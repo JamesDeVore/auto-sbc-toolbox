@@ -1,0 +1,35 @@
+{
+  "name": "auto-sbc-toolbox",
+  "title": "Auto Stat Block Converter & auto-sbc-toolbox",
+  "description": "A janky hack to create an entire monster compendium from a CSV file",
+  "version": "0.4.0",
+  "author": "James DeVore",
+  "scripts": [
+    "auto-sbc-toolbox.js",
+    "scripts/d3/d3.min.js",
+    "scripts/d3-fetch/d3-fetch.min.js"
+  ],
+  "esmodules": [
+    "PF1-StatBlock-Converter-Module/statblock-converter/scripts/sbc.js"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "packs": [
+    {
+      "name": "data-macros",
+      "label": "Data Macros",
+      "path": "./packs/data-macros.db",
+      "entity": "Macro"
+    }
+  ],
+  "url": "https://github.com/JamesDeVore/auto-sbc-toolbox",
+  "download": "https://github.com/JamesDeVore/auto-sbc-toolbox/archive/master.zip",
+  "manifest": "https://raw.githubusercontent.com/JamesDeVore/auto-sbc-toolbox/master/module.json",
+  "minimumCoreVersion": "0.6.0",
+  "compatibleCoreVersion": "1.0.0"
+}
