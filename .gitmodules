@@ -1,0 +1,3 @@
+[submodule "PF1-StatBlock-Converter-Module"] 
+  path = PF1-StatBlock-Converter-Module 
+  url = https://github.com/JamesDeVore/PF1-StatBlock-Converter-Module.git
