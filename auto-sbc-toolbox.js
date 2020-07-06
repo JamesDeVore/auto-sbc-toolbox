@@ -1,7 +1,7 @@
 /**
  * Adapted for PF1 system from original module: https://github.com/jopeek/fvtt-loot-sheet-npc-5e
  */
-
+let tempfunc = console.log;
 class GenerateCompendiumDialog extends Dialog {
   constructor(callback, options) {
     if (typeof options !== "object") {
@@ -59,6 +59,7 @@ class GenerateCompendiumDialog extends Dialog {
     let source = html.find('input[name="source"]').val();
     let template = html.find('input[name="template"]').val();
     let entity = html.find('select[name="entity"]').val();
+    console.log = () => {};
 
     if (entity != "Actor" && entity != "Item") {
       ui.notifications.error(game.i18n.localize("ERROR.tbInvalidEntity"));
@@ -149,6 +150,7 @@ class GenerateCompendiumDialog extends Dialog {
           let monster = data[i];
           nameForDebugging = monster.Name;
           let inputTemplate = `${monster.Name} CR ${monster.CR}
+
 XP ${monster.XP} 
 ${monster.Alignment} ${monster.Size} ${monster.Race} ${monster.Type} ${
             monster.Class
@@ -157,6 +159,7 @@ Init ${monster.Init}; Senses ${monster.Senses} ${
             monster.Aura ? `Aura ${monster.Aura}` : ""
           }
 DEFENSE
+
 AC ${monster.AC} ${monster.AC_Mods}
 hp ${monster.HP} ${monster.HD}
 ${monster.Saves}
@@ -169,6 +172,7 @@ ${
           } ${monster.SR ? `SR ${monster.SR}` : ""} ${
             monster.Weaknesses ? `Weaknesses ${monster.Weaknesses}` : ""
           }
+
 OFFENSE
 Speed ${monster.Speed} ${monster.Climb ? `Climb ${monster.Climb}` : ""} ${
             monster.Swim ? `Swim ${monster.Swim}` : ""
@@ -184,7 +188,13 @@ ${
     ? `Spell-Like Abilities ${monster.SpellLikeAbilities}`
     : ""
 }
-${monster.SpellsKnown ? `${monster.SpellsKnown.split("  ").join("\n")}` : ""}
+
+${
+  monster.SpellsKnownFormatted
+    ? `${monster.SpellsKnownFormatted.split("&").join("\n")}`
+    : ""
+}
+
 STATISTICS
 ${monster.AbilityScores}
 Base Atk ${monster.BaseAtk}; CMB ${monster.CMD}; CMD ${monster.CMB}
@@ -193,11 +203,13 @@ ${monster.Skills ? `Skills ${monster.Skills}` : ""}
 ${monster.RacialMods ? `Modifiers ${monster.RacialMods}` : ""}
 ${monster.SQ ? `SQ ${monster.SQ}` : ""}
 Languages ${monster.Languages}
+
 ${
   monster.SpecialAbilities
     ? `Special Abilities ${monster.SpecialAbilities}`
     : ""
 }
+
 ECOLOGY
 Environment ${monster.Environment}
 Organization ${monster.Organization}
@@ -232,19 +244,18 @@ ${monster.Description}
           if (otherDirNames.includes(raceType)) {
             basePath = basePath + "creature-types/";
           }
-          // if (monster.SpellsKnown) {
-          //   debugger;
-          // }
+          if (monster.SpellsKnownFormatted) {
+            console.log("breakpoint");
+          }
 
-          try {
-            let converted = await window.convertStatBlock({
-              value: inputTemplate,
-            });
-            let entity = await pack.createEntity(converted);
+          let converted = await window.convertStatBlock({
+            value: inputTemplate,
+          });
+          let entity = await pack.createEntity(converted);
+          if (!entity.error) {
             entity.update({ img: basePath + raceType + ".png" }); // force update to auto-calculate other data (e.g. totals)
-          } catch (e) {
-            failedMonsters.push({ name: monster.Name, error: e.toString() });
-            console.log(`${nameForDebugging} Failed!`);
+          } else {
+            failedMonsters.push(entity);
           }
         }
         ui.notifications.info(
@@ -253,6 +264,7 @@ ${monster.Description}
             type: entity,
           })
         );
+        console.log = tempfunc;
         console.log("Failed: ", failedMonsters);
       } catch (err) {
         ui.notifications.error(game.i18n.localize("ERROR.tbGenerationError"));
