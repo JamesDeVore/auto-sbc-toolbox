@@ -248,14 +248,14 @@ ${monster.Description}
             console.log("breakpoint");
           }
 
-          let converted = await window.convertStatBlock({
-            value: inputTemplate,
-          });
-          let entity = await pack.createEntity(converted);
-          if (!entity.error) {
+          try {
+            let converted = await window.convertStatBlock({
+              value: inputTemplate,
+            });
+            let entity = await pack.createEntity(converted);
             entity.update({ img: basePath + raceType + ".png" }); // force update to auto-calculate other data (e.g. totals)
-          } else {
-            failedMonsters.push(entity);
+          } catch (e) {
+            failedMonsters.push(inputTemplate);
           }
         }
         ui.notifications.info(
