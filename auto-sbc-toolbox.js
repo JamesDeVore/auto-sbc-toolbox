@@ -150,14 +150,13 @@ class GenerateCompendiumDialog extends Dialog {
           let monster = data[i];
           nameForDebugging = monster.Name;
           let inputTemplate = `${monster.Name} CR ${monster.CR}
-
 XP ${monster.XP} 
 ${monster.Alignment} ${monster.Size} ${monster.Race} ${monster.Type} ${
             monster.Class
           }
-Init ${monster.Init}; Senses ${monster.Senses} ${
-            monster.Aura ? `Aura ${monster.Aura}` : ""
-          }
+Init ${monster.Init}; Senses ${monster.Senses} 
+${monster.Aura ? `Aura ${monster.Aura}` : ""}
+
 DEFENSE
 
 AC ${monster.AC} ${monster.AC_Mods}
@@ -165,42 +164,41 @@ hp ${monster.HP} ${monster.HD}
 ${monster.Saves}
 ${
   monster.DefensiveAbilities
-    ? `Defensive Abilities ${monster.DefensiveAbilities}`
+    ? `Defensive Abilities ${monster.DefensiveAbilities} `
     : ""
-} ${monster.DR ? `DR ${monster.DR}` : ""} ${
+}${monster.DR ? `DR ${monster.DR}` : ""} ${
             monster.Immune ? `Immune ${monster.Immune}` : ""
           } ${monster.SR ? `SR ${monster.SR}` : ""} ${
             monster.Weaknesses ? `Weaknesses ${monster.Weaknesses}` : ""
           }
 
 OFFENSE
+
 Speed ${monster.Speed} ${monster.Climb ? `Climb ${monster.Climb}` : ""} ${
             monster.Swim ? `Swim ${monster.Swim}` : ""
           } ${monster.Fly ? `Fly ${monster.Fly}` : ""} ${
             monster.Burrow ? `Burrow ${monster.Burrow}` : ""
+          }${monster.Melee ? `\nMelee ${monster.Melee}` : ""}${
+            monster.Ranged ? `\nRanged ${monster.Ranged}` : ""
           }
-${monster.Melee ? `Melee ${monster.Melee}` : ""}
-${monster.Ranged ? `Ranged ${monster.Ranged}` : ""}
 Space ${monster.Space}; Reach ${monster.Reach}
-${monster.SpecialAttacks ? `Special Attacks ${monster.SpecialAttacks}` : ""}
-${
-  monster.SpellLikeAbilities
-    ? `Spell-Like Abilities ${monster.SpellLikeAbilities}`
-    : ""
-}
-
-${
-  monster.SpellsKnownFormatted
-    ? `${monster.SpellsKnownFormatted.split("&").join("\n")}`
-    : ""
-}
+${monster.SpecialAttacks ? `Special Attacks ${monster.SpecialAttacks}` : ""}${
+            monster.SpellLikeAbilitiesFormatted
+              ? `\n${monster.SpellLikeAbilitiesFormatted.split("~").join("\n")}`
+              : ""
+          }${
+            monster.SpellsKnownFormatted
+              ? `\n${monster.SpellsKnownFormatted.split("&").join("\n")}`
+              : ""
+          }
 
 STATISTICS
+
 ${monster.AbilityScores}
 Base Atk ${monster.BaseAtk}; CMB ${monster.CMD}; CMD ${monster.CMB}
 Feats ${monster.Feats}
 ${monster.Skills ? `Skills ${monster.Skills}` : ""}
-${monster.RacialMods ? `Modifiers ${monster.RacialMods}` : ""}
+${monster.RacialMods ? `Racial Modifiers ${monster.RacialMods}` : ""}
 ${monster.SQ ? `SQ ${monster.SQ}` : ""}
 Languages ${monster.Languages}
 
@@ -211,20 +209,15 @@ ${
 }
 
 ECOLOGY
+
 Environment ${monster.Environment}
 Organization ${monster.Organization}
 Treasure ${monster.Treasure}
 ${monster.Description}
 `;
 
-          let raceType = monster.Type.toLowerCase().replace(" ", "-");
+          let raceType = monster.Icon_Type.toLowerCase().replace(" ", "-");
           //fix annoying typo
-          if (raceType == "aberration") {
-            raceType = "abberation";
-          }
-          if (raceType == "humanoid") {
-            raceType = "human";
-          }
           let basePath = "systems/pf1/icons/races/";
           let otherDirNames = [
             "aberration",
@@ -248,13 +241,28 @@ ${monster.Description}
             console.log("breakpoint");
           }
 
+          if (raceType == "aberration") {
+            raceType = "abberation";
+          }
+          if (raceType == "humanoid") {
+            raceType = "human";
+          }
+          let fileType = ".png";
+          if (raceType == "human" || raceType == "ooze") {
+            fileType = ".jpg";
+          }
           try {
             let converted = await window.convertStatBlock({
               value: inputTemplate,
             });
             let entity = await pack.createEntity(converted);
-            entity.update({ img: basePath + raceType + ".png" }); // force update to auto-calculate other data (e.g. totals)
+            let configObject = {
+              img: basePath + raceType + fileType,
+              data: { details: { notes: { value: monster.FullText } } },
+            };
+            entity.update(configObject); // force update to auto-calculate other data (e.g. totals)
           } catch (e) {
+            console.log(e);
             failedMonsters.push(inputTemplate);
           }
         }
